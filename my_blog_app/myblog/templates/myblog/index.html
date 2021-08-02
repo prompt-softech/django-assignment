@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+  <title>Django comment section</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+    integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="{% static 'myblog/css/app.css' %}">
+</head>
+
+<body class="bg-light">
+
+  <nav>
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          Django
+        </a>
+        <div class="d-flex align-items-center" id="nav-auth">
+          {% if loginstatus %}
+
+          <span class="lead text-white m-0 p-0 me-3">Hello, {{uname}}</span>
+          <form action="/myblog/logout/" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-light me-3" type="submit">Logout</button>
+          </form>
+          {% else %}
+
+          <button data-bs-toggle="modal" data-bs-target="#loginModal"
+            class="btn btn-sm btn-outline-light me-3">Login</button>
+          <button data-bs-toggle="modal" data-bs-target="#registerModal" class="btn btn-sm btn-primary">Signup</button>
+
+          {% endif %}
+
+        </div>
+      </div>
+    </nav>
+  </nav>
+
+  <div class=" pb-5 pt-5">
+    <div class="container">
+      {% if request.GET.error %}
+      <div class="alerts">
+        <div class="alert alert-warning">{{request.GET.error}}</div>
+      </div>
+      {% endif %}
+      <h1 class="display-6">
+        Everything you need to know about Django
+      </h1>
+      <small class="meta mb-3 text-muted d-block">
+        <span>2 Hours ago in</span>
+        <span>Web Development</span> <br>
+        <span>By John Doe</span>
+      </small>
+      <article>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam suscipit sint recusandae qui nihil? Nulla ut,
+          culpa, nostrum quia eos est necessitatibus aperiam impedit mollitia cum animi et voluptate. Corporis, aliquid
+          perspiciatis molestias perferendis, excepturi enim suscipit consequatur porro ullam voluptatem cupiditate
+          exercitationem in dolor iusto possimus dolorum mollitia earum.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam suscipit sint recusandae qui nihil? Nulla ut,
+          culpa, nostrum quia eos est necessitatibus aperiam impedit mollitia cum animi et voluptate. Corporis, aliquid
+          perspiciatis molestias perferendis, excepturi enim suscipit consequatur porro ullam voluptatem cupiditate
+          exercitationem in dolor iusto possimus dolorum mollitia earum.
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam suscipit sint recusandae qui nihil? Nulla ut,
+          culpa, nostrum quia eos est necessitatibus aperiam impedit mollitia cum animi et voluptate. Corporis, aliquid
+          perspiciatis molestias perferendis, excepturi enim suscipit consequatur porro ullam voluptatem cupiditate
+          exercitationem in dolor iusto possimus dolorum mollitia earum.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam suscipit sint recusandae qui nihil? Nulla ut,
+          culpa, nostrum quia eos est necessitatibus aperiam impedit mollitia cum animi et voluptate. Corporis, aliquid
+          perspiciatis molestias perferendis, excepturi enim suscipit consequatur porro ullam voluptatem cupiditate
+          exercitationem in dolor iusto possimus dolorum mollitia earum.
+        </p>
+      </article>
+      <hr class="mt-4 mb-4">
+      <h5 class="mb-4">Comments </h5>
+
+      {% if loginstatus %}
+
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal">Post your
+        comment</button>
+
+      {% else %}
+
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login to Post your
+        comment</button>
+
+      {% endif %}
+
+      <div class="comments">
+        {% for comment in user_comment %}
+        <div class="comment mt-4">
+          <h6 class="text-primary mb-1">{{comment.username}}</h6>
+          <p class="text-muted mb-1">{{comment.text_message}}</p>
+          <span>{{comment.time_added}}</span>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark p-5 mt-5">
+    <p class="lead text-white m-0 text-center">&copy;2021</p>
+  </footer>
+
+  <!-- login model start -->
+  <div class="modal" tabindex="-1" id="loginModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/myblog/login/" method="POST" class="login" autocomplete="off">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input id="username" name="username" minlength="3" maxlength="25" class="form-control" placeholder="JohnR" required>
+            </div>
+            <div class="form-group mt-3">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" minlength="6" maxlength="25" name="password" class="form-control" required>
+            </div>
+
+            <div class="form-group mt-3">
+              <input type="checkbox" id="remember-login" name="remember_me">
+              <label for="remember-login">Remember me</label>
+            </div>
+
+            <div class="alerts">
+
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" value="login" class="btn btn-primary">Login</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- login model end -->
+
+  <!-- register model start -->
+  <div class="modal" tabindex="-1" id="registerModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Register</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/myblog/usersignup/" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="name">Name*</label>
+              <input type="text" id="name" name="username" minlength="3" maxlength="25" class="form-control" placeholder="John Doe"
+                required>
+            </div>
+            <div class="form-group mt-3">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com">
+            </div>
+            <div class="form-group mt-3">
+              <label for="password">Password*</label>
+              <input type="password" id="password" name="password" minlength="6" maxlength="25" class="form-control" required>
+            </div>
+            <!-- <div class="form-group mt-3">
+              <label for="password">Confirm Password*</label>
+              <input type="password" id="confirm_password" name="password" min="6" max="25" class="form-control" required>
+            </div> -->
+            <div class="alerts">
+
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Regsiter</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- register model end -->
+
+  <!-- post comment model start -->
+  <div class="modal" tabindex="-1" id="commentModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Post Comment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/myblog/addmessage/" method="POST">
+            {% csrf_token %}
+            <div class="form-group mt-4">
+              <label for="comment-input">Text</label>
+              <textarea id="comment-input" name="user_message" maxlength="1000" class="form-control"></textarea>
+            </div>
+            <div class="alerts">
+
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Post Comment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- post comment model end -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+
+  <script type="text/javascript">
+    const alert = document.querySelector('.alerts .alert')
+    if (alert) {
+      setTimeout(() => {
+        alert.remove()
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>
